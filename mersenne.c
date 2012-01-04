@@ -504,7 +504,11 @@ INT mersenne_initialise()
     MOD_W = mod_pow(s,192);
     MOD_INVW = mod_inv(MOD_W);
     
-    IF w >= 30)
+//    IF w >= 30)
+    /* Make sure the FFT is long enough so that each 'digit' can't
+     * overflow a 63 bit number (mod p is slightly less that 64
+     * bits) after the convolution */
+    IF 2*w+log_n >= 63)
         RETURN 0;
     
     digit_width0 = w;
@@ -537,20 +541,20 @@ INT mersenne_initialise()
         /* bit position for digit[i] is ceil((exponent * i) / n) */
         IF i > 0)
         {
-            digit_widths[i-1] = a - o;
-            IF digit_widths[i-1] != w && (digit_widths[i-1] != w+1))
+            u64 c = digit_widths[i-1] = a - o;
+            IF c != w && c != w+1)
                 RETURN 0;
             /* printf("digit_widths[%i] = %i from %i to %i\n", i-1, digit_widths[i-1], o, a-1); */
-        }
         
-        /* dwt weight is 2^(1 - ((exponent * i mod n)/n)) */
-        IF i > 0 && i < n)
-        {
-            r = n - r;
-            digit_weight[i]   = mod_pow(s, r);
-            digit_unweight[i] = mod_inv(mod_mul(digit_weight[i], n));
+            /* dwt weight is 2^(1 - ((exponent * i mod n)/n)) */
+            IF i < n)
+            {
+                r = n - r;
+                digit_weight[i]   = mod_pow(s, r);
+                digit_unweight[i] = mod_inv(mod_mul(digit_weight[i], n));
+            }
         }
-        
+            
         o = a;
     }
 
@@ -730,7 +734,7 @@ INT main(INT w, char ** v)
     do log_n++, n = 1 << log_n;
     while(!mersenne_initialise());
 
-    /* printf("Testing 2**%d-1 with fft size 2**%d for %d iterations\n", exponent, log_n, iterations); */
+    /* printf("Testing 2**%d-1 with fft size 2**%d for %d iterations\n", exponent, log_n, j); */
 
     FOR k = 0; k < 1; k++)
     {

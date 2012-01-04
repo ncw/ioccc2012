@@ -149,6 +149,7 @@ def lz77(txt):
     Suggest strings which could be compressed by use of an lz77 algorithm with #define
     """
     txt = txt.split("\n")[-1]
+    savings = []
     for w in range(2,20):
         d = defaultdict(int)
         for i in range(len(txt)-w):
@@ -157,8 +158,10 @@ def lz77(txt):
         for substring, count in d.iteritems():
             define = "#define X %s" % substring
             saving = count*(len(substring)-1) - len(define)
-            if saving > 10:
-                print "Use: %r to save %d bytes (repeated %d times)" % (define, saving, count)
+            savings.append((saving, "Use: %r to save %d bytes (repeated %d times)" % (define, saving, count)))
+    savings.sort(reverse=True)
+    for _, saving in savings[:10]:
+        print saving
 
 def main():
     if len(sys.argv) != 3:

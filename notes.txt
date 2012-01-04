@@ -14,16 +14,12 @@ Make initial #defines say something? 9 letters
   * PRIMESGUD
   * PRIMES_OK
 
-Checking residue for M(1966079)
-Running ['./mersenne_final', '1966079', '400']
-That took 38.678s
-Result: '0xA946425D6258CF26'
-Traceback (most recent call last):
-  File "./unit_test.py", line 121, in <module>
-    main()
-  File "./unit_test.py", line 117, in main
-    assert expected_residue == actual_residue, "Residue check failed"
-AssertionError: Residue check failed
+This can do an FFT of up to 2**26 entries.  Each entry can have up to
+18 bits in (as 2*18+26 <= 63), which means that the biggest exponent
+that it can test for primality is 18*(2**26) = 1,207,959,552.  This would
+be number of 363 million decimal digits so could be used to find a 100
+million digit prime and scoop the EFF $150,000 prize!
+https://www.eff.org/awards/coop
 
 
 NOTES runs much faster when compiled with 64 bit compiler, but should compile and run under any C99 compiler.

@@ -1,0 +1,72 @@
+To write the most Obscure/Obfuscated C program under the rules below.
+To show the importance of programming style, in an ironic way.
+To stress C compilers with unusual code.
+To illustrate some of the subtleties of the C language.
+To provide a safe forum for poor C code. :-)
+
+Microsoft doesn't support C99
+  * change uint32_t to unsigned __int32
+  * change uint64_t to unsigned __int64
+  * replace #include<inttypes.h> with #define PRIX64 "%ull"
+
+Make initial #defines say something? 9 letters
+  * MERSN_PM
+  * PRIMESGUD
+  * PRIMES_OK
+
+Checking residue for M(1966079)
+Running ['./mersenne_final', '1966079', '400']
+That took 38.678s
+Result: '0xA946425D6258CF26'
+Traceback (most recent call last):
+  File "./unit_test.py", line 121, in <module>
+    main()
+  File "./unit_test.py", line 117, in main
+    assert expected_residue == actual_residue, "Residue check failed"
+AssertionError: Residue check failed
+
+
+NOTES runs much faster when compiled with 64 bit compiler, but should compile and run under any C99 compiler.
+
+We strongly encourage the use of Markdown in submitted remarks and documentation!
+
+FIXME doesn't work under lenny becaue of py2.5 feature
+
+DONE Add 0 check for definitely prime!
+
+DONE fix compiler warning
+
+hints file
+  * is that a picture of a monk?  Who could it be?
+  * wait, is that an inscription?
+
+DONE Remove ?0:1 conditional?
+
+DONE Write test suite
+
+Try 32 bit compiler.  Try other compilers, eg intel, tinycc...
+
+DONE Validate the program fits the rules
+
+Extra spaces after defines?
+
+DONE Remove trailing spaces
+
+DONE Can replace if(
+
+NOT DONE - doesn't work can use ;if( and ;for( to save a few more bytes!
+
+DONE Need to localise variables more so use the free single digit variables for local variables
+
+DONE Can remove most of the casts most likely
+
+DONE Calculate root1 and root2?
+
+DONE Use ARMprime code in C to prove some Mersenne primes
+
+./mersenne 23209 10
+Testing 2**23209-1 with fft size 2**10 for 23207 iterations
+Initialising...Done
+Testing exponent 23209
+That took 27.4 seconds for 23207 iterations, ie 0.00118068 seconds/iteration
+Residue is 0x0000000000000000

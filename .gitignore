@@ -1,0 +1,10 @@
+*.pyc
+*~
+*.o
+mersenne
+mersenne_crushed
+mersenne_crushed.c
+mersenne_uncrushed.c
+mersenne_final
+mersenne_final.c
+junk

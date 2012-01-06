@@ -15,13 +15,6 @@ lot of tidying up - getting rid of global variables etc.
 
 #define u32 uint32_t
 #define u64 uint64_t
-#define VOID void
-#define INT int
-#define CALLOC_N calloc(n,sizeof(u64))
-#define RETURN return
-#define FOR for(
-#define IF if(
-#define SHR32 >>32
 /* typedef uint32_t u32; */
 /* typedef uint64_t u64; */
 /* typedef uint32_t u32; FIXME combine two typedefs, or typedef plus definition?*/
@@ -40,7 +33,7 @@ u64 //ROOT_ORDER=5<<26,		/* 5 * 2^26 */
     MOD_W,
     MOD_INVW;
 
-INT exponent,
+int exponent,
     n,
     log_n,
     digit_width0,
@@ -186,9 +179,9 @@ u64 mod_add(u64 x, u64 y)
 
     u64 r = y - x;		/* y - (-x) */
     /* if borrow generated - hopefully the compiler will optimise this! */
-    IF y < x)
+    if (y < x)
 	r += MOD_P;	/* Add back p if borrow */
-    RETURN r;
+    return r;
 }
 
 /************************************************************
@@ -237,7 +230,7 @@ u64 mod_adc(u64 x, u32 w, u64 *c)
 // 		MOV	r1, #0		; msw must be 0 (shift < 32)
 
     /* return low bits of the result */
-    RETURN s & ((((u64)1) << w) - 1);
+    return s & ((((u64)1) << w) - 1);
 
 // 		LDMFD	sp!, {r4-r6,pc}^
 
@@ -256,9 +249,9 @@ u64 mod_sub(u64 x, u64 y)
 
     u64 r = x - y;
     /* if borrow generated - hopefully the compiler will optimise this! */
-    IF x < y)
+    if (x < y)
 	r += MOD_P;	/* Add back p if borrow */
-    RETURN r;
+    return r;
 }
 
 /************************************************************
@@ -273,14 +266,14 @@ Care is needed with the carries
 
 u64 mod_reduce(u64 b, u64 a)
 {
-    u32 d = b SHR32,
+    u32 d = b >>32,
         c = b;
-    IF a >= MOD_P)		/* (x1, x0) */
+    if (a >= MOD_P)		/* (x1, x0) */
 	a -= MOD_P;
     a = mod_sub(a, c);
     a = mod_sub(a, d);
     a = mod_add(a, ((u64)c)<<32);
-    RETURN a;
+    return a;
 }
 
 
@@ -294,9 +287,9 @@ z will be in range 0..p-1
 u64 mod_mul(u64 x, u64 y)
 {
     u32 a = x,
-        b = x SHR32,
+        b = x >>32,
         c = y,
-        d = y SHR32;
+        d = y >>32;
 
     /* first synthesize the product using 32*32 -> 64 bit multiplies */
     x = b * (u64)c; /* b*c */
@@ -307,20 +300,20 @@ u64 mod_mul(u64 x, u64 y)
 
     x += y;			/* b*c + a*d */
     /* carry? */
-    IF x < y)
+    if (x < y)
 	f += 1LL << 32; /* carry into upper 32 bits - can't overflow */
 
     t = x << 32;
     e += t;			/* a*c + LSW(b*c + a*d) */
     /* carry? */
-    IF e < t)
+    if (e < t)
 	f += 1; /* carry into upper 64 bits - can't overflow*/
-    t = x SHR32;
+    t = x >>32;
     f += t;			/* b*d + MSW(b*c + a*d) */
     /* can't overflow */
 
     /* now reduce: (b*d + MSW(b*c + a*d), a*c + LSW(b*c + a*d)) */
-    RETURN mod_reduce(f, e);
+    return mod_reduce(f, e);
 }
 
 /************************************************************
@@ -331,16 +324,16 @@ Removed top bit speedup to save space
 u64 mod_pow(u64 a, u64 b)
 {
     u64 r = 1;
-    INT i;
+    int i;
 
-    FOR i = 63; i >= 0; i--)
+    for (i = 63; i >= 0; i--)
     {
         r = mod_mul(r, r);
-        IF (b >> i) & 1)
+        if ((b >> i) & 1)
             r = mod_mul(r, a);
     }
 
-    RETURN r;
+    return r;
 }
 
 /************************************************************
@@ -355,7 +348,7 @@ We do this by the easy and not very efficient method below
 
 u64 mod_inv(u64 a)
 {
-    RETURN mod_pow(a, MOD_P-2);
+    return mod_pow(a, MOD_P-2);
 }
 
 /************************************************************
@@ -369,11 +362,11 @@ u64 mod_inv(u64 a)
 ; Exit
 ************************************************************/
 
-VOID mod_vector_mul(u32 n, u64 *x, u64 *y)
+void mod_vector_mul(u32 n, u64 *x, u64 *y)
 {
-    INT i;
+    int i;
 
-    FOR i = 0; i < n; i++)
+    for (i = 0; i < n; i++)
 	x[i] = mod_mul(x[i], y[i]);
 }
 
@@ -388,10 +381,10 @@ VOID mod_vector_mul(u32 n, u64 *x, u64 *y)
 ; Exit
 ************************************************************/
 
-VOID mod_sqr_vector(u32 n, u64 *x)
+void mod_sqr_vector(u32 n, u64 *x)
 {
-    INT i;
-    FOR i = 0; i < n; i++)
+    int i;
+    for (i = 0; i < n; i++)
 	x[i] = mod_mul(x[i], x[i]);
 }
 
@@ -406,23 +399,23 @@ A fastish O(n log n) FFT
 Output is bit-reversed
 ************************************************************/
 
-VOID fft_fastish()
+void fft_fastish()
 {
     u64 d = MOD_W;
-    INT k;
+    int k;
 
-    FOR k = log_n; k >= 1; k--)
+    for (k = log_n; k >= 1; k--)
     {
-        INT m = 1 << k,
+        int m = 1 << k,
             c = m >> 1,
             j,
             r;
         u64 w = 1;
-        FOR j = 0; j < c; j++)
+        for (j = 0; j < c; j++)
         {
-            FOR r = 0; r < n; r += m)
+            for (r = 0; r < n; r += m)
             {
-                INT a = r + j,
+                int a = r + j,
                     b = a + c;
                 u64 u = x[a],
                     v = x[b];
@@ -441,24 +434,24 @@ A fastish O(n log n) Inverse FFT
 Input should be bit-reversed
 ************************************************************/
 
-VOID invFft_fastish()
+void invFft_fastish()
 {
-    INT k;
+    int k;
 
-    FOR k = 1; k <= log_n; k++)
+    for (k = 1; k <= log_n; k++)
     {
-        INT m = 1 << k,
+        int m = 1 << k,
             c = m >> 1,
             j,
             r;
         u64 z = (u64)(1<<((u32)log_n - (u32)k)),
             d = mod_pow(MOD_INVW, z),
             w = 1;
-        FOR j = 0; j < c; j++)
+        for (j = 0; j < c; j++)
         {
-            FOR r = 0; r < n; r += m)
+            for (r = 0; r < n; r += m)
             {
-                INT a = r + j,
+                int a = r + j,
                     b = a + c;
                 u64 u = x[a],
                     v = mod_mul(w, x[b]);
@@ -487,9 +480,9 @@ i is the number of the element
 return 0 for failed 1 for ok
 ************************************************************/
 
-INT mersenne_initialise()
+int mersenne_initialise()
 {
-    INT o = 0,
+    int o = 0,
         i,
         w = exponent / n;
 
@@ -509,46 +502,46 @@ INT mersenne_initialise()
      * bits) after the convolution
      * Some digits are (w+1) wide so use this for safety
      * (w+1)*2+log_n >= 63 */
-    IF 2*w+log_n >= 61)
-        RETURN 0;
+    if (2*w+log_n >= 61)
+        return 0;
     
     digit_width0 = w;
     digit_width_0_max = 1 << w;
     digit_width1 = w + 1;
     
     /* memory allocation */
-    x = CALLOC_N;
-    digit_weight = CALLOC_N;
-    digit_unweight = CALLOC_N;
-    digit_widths = CALLOC_N;    /* This is oversized, but hey, ho... */
+    x = calloc(n,sizeof(u64));
+    digit_weight = calloc(n,sizeof(u64));
+    digit_unweight = calloc(n,sizeof(u64));
+    digit_widths = calloc(n,sizeof(u64));    /* This is oversized, but hey, ho... */
 
     /* digit weights */
     *digit_weight = 1;
     *digit_unweight = mod_inv(n);
-    FOR i = 0; i <= n; i++)
+    for (i = 0; i <= n; i++)
     {
 	u64 t = (u64)exponent * (u64)i,
             r = t % n,
             b = t / n; 
 	u32 a;
-        IF r SHR32)
-            RETURN 0;
-        IF (u32)r)        /* do ceil */
+        if (r >>32)
+            return 0;
+        if ((u32)r)        /* do ceil */
             b++;
-        IF b SHR32)
-            RETURN 0;
+        if (b >>32)
+            return 0;
 	a = b;
 
         /* bit position for digit[i] is ceil((exponent * i) / n) */
-        IF i > 0)
+        if (i > 0)
         {
             u64 c = digit_widths[i-1] = a - o;
-            IF c != w && c != w+1)
-                RETURN 0;
+            if (c != w && c != w+1)
+                return 0;
             /* printf("digit_widths[%i] = %i from %i to %i\n", i-1, digit_widths[i-1], o, a-1); */
         
             /* dwt weight is 2^(1 - ((exponent * i mod n)/n)) */
-            IF i < n)
+            if (i < n)
             {
                 r = n - r;
                 digit_weight[i]   = mod_pow(s, r);
@@ -561,7 +554,7 @@ INT mersenne_initialise()
 
 /* fft_initialise */
 
-    RETURN 1;
+    return 1;
 }
 
 /************************************************************
@@ -575,16 +568,16 @@ that is zero for a proper primality check
 
 u64 mersenne_residue()
 {
-    INT i = 0,
+    int i = 0,
         j = 0;
     u64 r = 0;
-    FOR ; i < 64 && j < n; i += digit_widths[j], j++)
+    for (; i < 64 && j < n; i += digit_widths[j], j++)
         r |= x[j] << i;
-    IF r)
-        RETURN r;
-    FOR r = j = 0; j < n; j++)
+    if (r)
+        return r;
+    for (r = j = 0; j < n; j++)
         r |= x[j];
-    RETURN r;
+    return r;
 }
 
 /************************************************************
@@ -595,19 +588,19 @@ It assumes that x has had the first round of carry propagation done on it
 already so each digit[i] is < 2^digit_widths[i] < 2^32
 ************************************************************/
 
-VOID mersenne_add32(u32 c, INT i)
+void mersenne_add32(u32 c, int i)
 {
     while (c)
     {
-        FOR ; i < n; i++)
+        for (; i < n; i++)
         {
             u32 y = 1 << digit_widths[i];
             x[i] += c;
-            IF x[i] >= y)
+            if (x[i] >= y)
                 x[i] -= y,
                     c = 1;
             else
-                RETURN;		/* done if no carry */
+                return;		/* done if no carry */
         }
 /*         printf("Wrapping round the end in mersenne_add32\n"); */
         i = 0;
@@ -622,20 +615,20 @@ and that x has had the first round of carry propagation done on it
 already so each digit[i] is < 2^digit_widths[i] < 2^32
 ************************************************************/
 
-VOID mersenne_sub32(u32 c)
+void mersenne_sub32(u32 c)
 {
-    INT i;
+    int i;
     while (c)
     {
-        FOR i = 0; i < n; i++)
+        for (i = 0; i < n; i++)
         {
             u32 y = 1 << digit_widths[i];
             x[i] -= c;
-            IF x[i] >= y)
+            if (x[i] >= y)
                 x[i] += y,
                     c = 1;
             else
-                RETURN;		/* done if no carry */
+                return;		/* done if no carry */
         }
 /*         printf("Wrapping round the end in mersenne_sub32\n"); */
     }
@@ -648,20 +641,20 @@ It assumes that x has had the first round of carry propagation done on it
 already so each digit[i] is < 2^digit_widths[i] < 2^32
 ************************************************************/
 
-VOID mersenne_add64(u64 c)
+void mersenne_add64(u64 c)
 {
-    INT i;
+    int i;
     while (c)
     {
-        FOR i = 0; i < n; i++)
+        for (i = 0; i < n; i++)
         {
             x[i] = mod_adc(x[i], digit_widths[i], &c);
             u32 t = c;
-            IF !(c SHR32) && t < digit_width_0_max)
+            if (!(c >>32) && t < digit_width_0_max)
             {
-                IF t)
+                if (t)
                     mersenne_add32(t, i+1);	/* carry in 32 bits if possible */
-                RETURN;				/* finished if carry is 0 */
+                return;				/* finished if carry is 0 */
             }
         }
         /* printf("Wrapping round the end in mersenne_add64\n"); */
@@ -672,9 +665,9 @@ VOID mersenne_add64(u64 c)
 This does one interation
 ************************************************************/
 
-VOID mersenne_mul()
+void mersenne_mul()
 {
-    INT i;
+    int i;
     u64 c = 0;
 
     /* weight the input */
@@ -693,11 +686,11 @@ VOID mersenne_mul()
     mod_vector_mul(n, x, digit_unweight);
     
     /* carry propagation */
-    FOR i = 0; i < n; i++)
+    for (i = 0; i < n; i++)
         // printf("x[%i]=0x%016llX, carry=0x%016llX\n", i, x[i], carry);
         x[i] = mod_adc(x[i], digit_widths[i], &c);
         // printf("x[%i]=0x%016llX, carry=0x%016llX\n", i, x[i], carry);
-    IF c)
+    if (c)
         // printf("Wrapping carry in mersenne_mul carry propagation\n");
         mersenne_add64(c);
 
@@ -716,16 +709,16 @@ where q = Mersenne exponent, N = fft run-length, n = Number of
 Lucas iterations (or 0 for full test)
 ************************************************************/
 
-INT main(INT w, char ** v)
+int main(int w, char ** v)
 {
-    INT i,k,j;
+    int i,k,j;
 //    if (w < 2 || w > 3)
-    IF w < 2)
+    if (w < 2)
     {
 //        printf("Usage:\n %s q [n]\nwhere q is exponent and n is iterations\n", v[0]);
 //        printf("Usage:\n %s p [iters]\n", v[0])
         puts("Usage:@p@[n]");
-        RETURN 1;
+        return 1;
     }
     
     exponent = atoi(v[1]);
@@ -737,13 +730,13 @@ INT main(INT w, char ** v)
 
     /* printf("Testing 2**%d-1 with fft size 2**%d for %d iterations\n", exponent, log_n, j); */
 
-    FOR k = 0; k < 1; k++)
+    for (k = 0; k < 1; k++)
     {
         *x = 4;
-        FOR i = 0; i < j; i++)
+        for (i = 0; i < j; i++)
             mersenne_mul();
     }
     /* printf("0x%016llX\n", mersenne_residue()); */
     printf("0x%016" PRIX64 "\n", mersenne_residue());
-    RETURN 0;
+    return 0;
 }

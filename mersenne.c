@@ -504,11 +504,12 @@ INT mersenne_initialise()
     MOD_W = mod_pow(s,192);
     MOD_INVW = mod_inv(MOD_W);
     
-//    IF w >= 30)
     /* Make sure the FFT is long enough so that each 'digit' can't
      * overflow a 63 bit number (mod p is slightly less that 64
-     * bits) after the convolution */
-    IF 2*w+log_n >= 63)
+     * bits) after the convolution
+     * Some digits are (w+1) wide so use this for safety
+     * (w+1)*2+log_n >= 63 */
+    IF 2*w+log_n >= 61)
         RETURN 0;
     
     digit_width0 = w;

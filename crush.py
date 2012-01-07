@@ -5,6 +5,9 @@ Mangle the C code passed in
 import re
 import sys
 
+# Message in #defines
+#       12345678901
+defines_message="HUNTPRIMES"
 
 def decomment(txt):
     """Remove comments"""
@@ -24,8 +27,13 @@ defines = (
     ('IF ', 'if ('),
     ('SHR32', '>>32'),
     ('FLOOPOVERN', "i = 0; i < n; i++)"),
-    ('XOFI', 'x[i]'),
+#    ('XOFI', 'x[i]'),
 )
+
+# Map single letters to symbols for #define message
+defines_message_symbols = {}
+for symbol, letter in zip((('u32',),('u64',))+defines, defines_message):
+    defines_message_symbols[symbol[0].strip()] = letter
 
 def splitdefines(txt):
     """split the code into two lists of defines and code"""
@@ -140,9 +148,8 @@ renames.extend(x[0].strip() for x in defines)
 
 import string
 alphabet = list('_'+string.uppercase + string.lowercase)
-#for c in prefix:
-#    alphabet.remove(c)
-#alphabet = list(prefix) + alphabet
+for c in defines_message:
+    alphabet.remove(c)
 for a in string.uppercase:
     for b in string.uppercase:
         alphabet.append(a+b)
@@ -167,7 +174,10 @@ def rename(txt):
     #print renames
     for word in renames:
         if word in txt:
-            replacement = alphabet.pop(0)
+            if word in defines_message_symbols:
+                replacement = defines_message_symbols[word]
+            else:
+                replacement = alphabet.pop(0)
             txt = re.sub(word, replacement, txt)
     return txt
 

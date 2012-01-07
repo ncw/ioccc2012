@@ -15,8 +15,20 @@ def decomment(txt):
     txt = re.sub(r"^\s+", r"", txt, flags=re.M);
     return txt
 
-def despace(txt):
-    """Remove as much white space as possible"""
+defines = (
+    ('VOID', 'void'),
+    ('INT ', 'int '),
+    ('CALLOC_N', 'calloc(n,sizeof(u64))'),
+    ('RETURN', 'return'),
+    ('FOR ', 'for ('),
+    ('IF ', 'if ('),
+    ('SHR32', '>>32'),
+    ('FLOOPOVERN', "i = 0; i < n; i++)"),
+    ('XOFI', 'x[i]'),
+)
+
+def splitdefines(txt):
+    """split the code into two lists of defines and code"""
     pre = []
     c = []
     for line in txt.split("\n"):
@@ -24,10 +36,34 @@ def despace(txt):
             pre.append(line)
         else:
             c.append(line)
+    return pre, c
+
+def quotemeta(text):
+    """
+    Quotes all the meta characters in the text
+    """
+    return re.sub("(\W)", r"\\\1", text)
+
+def redefine(txt):
+    """
+    Substitude the defines in
+    """
+    pre, c = splitdefines(txt)
+    txt = "\n".join(c)
+    for new, old in defines:
+        #txt = re.sub(r"(?s)([^a-zA-Z]|\n)"+quotemeta(old)+r"([^a-zA-Z]|\n)", r"\1"+new+r"\2", txt)
+        txt = txt.replace(old, new)
+        old = old.replace(" ","")
+        pre.append("#define %s %s" % (new, old))
+    pre = "\n".join(pre)
+    return pre + "\n" + txt
+
+def despace(txt):
+    """Remove as much white space as possible"""
+    pre, c = splitdefines(txt)
     pre = "\n".join(pre)
     txt = " ".join(c)
     txt = txt.replace("\t", " ")
-
     txt = re.sub(r"\s+", " ", txt, flags=re.S)
     txt = re.sub(r"([a-zA-Z0-9_])\s+([^a-zA-Z0-9_\s])", r"\1\2", txt, flags=re.S)
     txt = re.sub(r"([^a-zA-Z0-9_\s])\s+([a-zA-Z0-9_])", r"\1\2", txt, flags=re.S)
@@ -98,19 +134,12 @@ renames = [
     'invK',
     'old_addr',
     'MASK32',
-    'VOID',
-    'INT',
-    'CALLOC_N',
-    'RETURN',
-    'FOR',
     'ARRAY_SIZE',
-    'SHR32',
-    'IF',
     ]
+renames.extend(x[0].strip() for x in defines)
 
 import string
 alphabet = list('_'+string.uppercase + string.lowercase)
-#prefix="PRIMESOK"
 #for c in prefix:
 #    alphabet.remove(c)
 #alphabet = list(prefix) + alphabet
@@ -169,6 +198,7 @@ def main():
         raise SystemExit(1)
     _, in_filename, out_filename = sys.argv
     txt = open(in_filename).read()
+    txt = redefine(txt)
     txt = decomment(txt)
     txt = despace(txt)
     txt = rename(txt)

@@ -52,6 +52,9 @@ mrproper:	clean
 release:	clean
 		zip -9 idwt-`date -I`.zip Makefile *.py *.txt *.c *.h *.s
 
+test:		mersenne_final
+		./unit_test.py mersenne_final
+
 ## Rule Patterns ##
 
 .SUFFIXES:

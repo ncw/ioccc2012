@@ -116,6 +116,7 @@ def main():
         actual_residue >>= 32
         assert expected_residue == actual_residue, "Residue check failed"
         print "Check for M(%d) OK" % p
+    print "All OK"
 
 if __name__ == "__main__":
     main()

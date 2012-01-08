@@ -43,7 +43,7 @@ mersenne_final.c:	mersenne_crushed.c artify.py
 		./check.py mersenne_final.c
 
 clean:
-		-rm -f *.o *.pyc $(binaries) core *~
+		-rm -f *.o *.pyc $(binaries) core *~ hints.html
 		-rm -rf test
 
 mrproper:	clean

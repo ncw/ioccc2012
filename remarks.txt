@@ -1,0 +1,25 @@
+Remarks
+=======
+
+This should compile on any compiler which supports "inttypes.h" from
+the C99 standard (eg gcc).
+
+It runs a lot quicker when compiled as a 64 bit binary!
+
+I have successfully compiled and run this program without changes or
+compiler warnings for:
+
+  * 64 bit Ubuntu Linux 11.10
+  * 32 bit Debian Linux (Lenny)
+  * Windows using [MINGW](http://www.mingw.org/)
+  * OS X 10.7 using Apple's gcc based compiler
+
+If you don't have a compiler which supports inttypes.h from C99 (hello
+it is 2012 Microsoft!) then you'll need to go platform specific:
+
+  * comment out the `#include <inttypes.h>` line
+  * change the `#define` for `uint32_t` to be an unsigned 32 bit type
+    `unsigned int` or `unsigned __int32`
+  * change the `#define` for `uint64_t` to be an unsigned 64 bit type
+    `unsigned long long` or `unsigned __int64`
+  * add `#define PRIX64 "llX"` or `"lX"` or `"I64X"`

@@ -4,6 +4,13 @@ To stress C compilers with unusual code.
 To illustrate some of the subtleties of the C language.
 To provide a safe forum for poor C code. :-)
 
+hack primes
+hunt
+okay
+
+Compiles and runs correctly under linux (32 and 64 bit), windows using
+mingw and MACOS X (using Apple's gcc)
+
 Microsoft doesn't support C99
   * change uint32_t to unsigned __int32
   * change uint64_t to unsigned __int64
@@ -14,12 +21,42 @@ Make initial #defines say something? 9 letters
   * PRIMESGUD
   * PRIMES_OK
 
-This can do an FFT of up to 2**26 entries.  Each entry can have up to
-18 bits in (as 2*18+26 <= 63), which means that the biggest exponent
-that it can test for primality is 18*(2**26) = 1,207,959,552.  This would
-be number of 363 million decimal digits so could be used to find a 100
-million digit prime and scoop the EFF $150,000 prize!
-https://www.eff.org/awards/coop
+
+Read times to check each prime in, make formula then extrapolate.
+Graph cycle time?
+
+Remove loop around mersenne_initialise - should be able to calculate the fft size straight off
+for p, need n such that ceil(n/p)*2+log2(n) <= 63?
+
+FIXME could use top bit of each fft element as a guard bit?  There should never be an overflow into it
+Could then test by squaring 2^p-1
+
+p, time (s)
+31, 0.002
+61, 0.002
+89, 0.002
+107, 0.003
+127, 0.003
+521, 0.013
+607, 0.015
+1279, 0.035
+2203, 0.099
+2281, 0.102
+3217, 0.141
+4253, 0.351
+4423, 0.375
+9689, 1.609
+9941, 1.651
+11213, 1.853
+19937, 6.829
+21701, 7.435
+23209, 7.993
+44497, 32.843
+86243, 136.767
+110503, 386.328
+132049, 461.943
+216091, 1631.627
+756839, 12676.713
 
 
 NOTES runs much faster when compiled with 64 bit compiler, but should compile and run under any C99 compiler.
@@ -66,3 +103,11 @@ Initialising...Done
 Testing exponent 23209
 That took 27.4 seconds for 23207 iterations, ie 0.00118068 seconds/iteration
 Residue is 0x0000000000000000
+
+...
+
+Entry
+
+build
+  * program is called prog.c
+

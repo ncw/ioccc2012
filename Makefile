@@ -55,6 +55,9 @@ release:	clean
 test:		mersenne_final
 		./unit_test.py mersenne_final
 
+hints.html:	hints.txt
+		markdown < hints.txt  > hints.html
+
 ## Rule Patterns ##
 
 .SUFFIXES:

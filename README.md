@@ -1,7 +1,7 @@
 IOCCC 2012 Entry
 ================
 
-This was my entry for the 21st [International Obfuscated C Code Contest](http://www.ioccc.org/).
+This was my entry for the 20th [International Obfuscated C Code Contest](http://www.ioccc.org/).
 
 Unfortunately it didn't win.
 
